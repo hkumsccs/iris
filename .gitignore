@@ -27,3 +27,5 @@
 *.exe
 *.out
 *.app
+
+c_cpp_properties.json
