@@ -1,0 +1,11 @@
+{
+  "configurations": [
+    {
+      "name": "Mac",
+      "includePath": [
+        "usr/include",
+        "/usr/local/Cellar/opencv/2.4.12_2/include/opencv2"
+      ]
+    }
+  ]
+}
