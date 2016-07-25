@@ -4,7 +4,7 @@
       "name": "Mac",
       "includePath": [
         "usr/include",
-        "/usr/local/Cellar/opencv/2.4.12_2/lib"
+        "/usr/local/Cellar/opencv/2.4.13/lib"
       ]
     }
   ]
