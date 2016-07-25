@@ -1,3 +1,6 @@
+# Emachine
+Emotion machine
+
 ## Setup
 
 ```
