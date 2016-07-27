@@ -7,6 +7,15 @@
 using namespace cv;
 using namespace std;
 
+#define KERNEL_SIZE 13 
+#define SIGMA_X 3
+/*
+ * All the references
+ *
+ * http://docs.opencv.org/2.4/doc/tutorials/core/how_to_scan_images/how_to_scan_images.html#performance-difference
+ *
+*/
+
 Mat initialize_box_filter (float size = 3.0)
 {
   return Mat::ones(size, size, CV_32F) / (size * size);
@@ -51,14 +60,17 @@ int main()
   Mat kernel = initialize_box_filter();
   Mat raw_image;
   Mat gray_image;
+  Mat blur_image;
+
+  Size ksz = Size(KERNEL_SIZE, KERNEL_SIZE);
 
   while(1)
   {
     // Assign mat image to the raw webcam footage
     cap.read(raw_image);
     cvtColor(raw_image, gray_image, CV_BGR2GRAY);
-    Mat smoothed_image = em_convolve(gray_image, kernel, gray_image.cols, gray_image.rows);
-    imshow("Test", smoothed_image);
+    GaussianBlur(gray_image, blur_image, ksz, SIGMA_X);
+    imshow("Test", blur_image);
     waitKey(1);
   }
 
