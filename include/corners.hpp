@@ -5,6 +5,6 @@
 
 namespace CornerDetector
 {
-   std::list<Point2D> FindCorners(Mat& f, int width, int height, double sigma, double threshold); 
+   std::list<std::pair<double, double>> FindCorners(Mat& f, int width, int height, double sigma, double threshold); 
    cv::Mat ComputeR(Mat& f, double sigma, double threshold, int width, int height, double k = 0.04);
 };

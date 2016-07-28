@@ -7,10 +7,33 @@ using namespace std;
 
 namespace CornerDetector
 {
-   std::list<Point2D> FindCorners(Mat& f, int width, int height, double sigma, double threshold)
+   std::list<std::pair<double, double>> FindCorners(Mat& f, int width, int height, double sigma, double threshold)
    {
-     std::list<Point2D> corner_list;
-     // TODO 
+     std::list<std::pair<double, double>> corner_list;
+
+     cv::Mat R = ComputeR(f, sigma, threshold, width, height);
+
+     // Sub-pixel approximation
+     for (int y = 1; y < height - 1; ++y)
+     {
+       for (int x = 1; x < width - 1; ++x)
+       {
+         double val = R.at<uint8_t>(x, y);
+         if(val > threshold && val > R.at<uint8_t>(x-1, y-1) && val > R.at<uint8_t>(x, y-1)
+            && val > R.at<uint8_t>(x+1, y-1) && val > R.at<uint8_t>(x-1, y)
+            && val > R.at<uint8_t>(x+1, y) && val > R.at<uint8_t>(x-1, y+1)
+            && val > R.at<uint8_t>(x, y+1) && val > R.at<uint8_t>(x+1, y+1))
+         {
+           double corner_x = x + .5 + (R.at<uint8_t>(x-1, y) - R.at<uint8_t>(x+1, y))
+                              / (R.at<uint8_t>(x-1, y) + R.at<uint8_t>(x+1, y) - 2 * val) / 2;
+           double corner_y = y + .5 + (R.at<uint8_t>(x, y-1) - R.at<uint8_t>(x, y+1))
+                              / (R.at<uint8_t>(x, y-1) + R.at<uint8_t>(x, y+1) - 2 * val) / 2;
+
+           corner_list.push_back(std::make_pair(corner_x, corner_y));
+         }
+       }
+     }
+
      return corner_list;
    }
 
