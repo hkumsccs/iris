@@ -3,12 +3,12 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/core/core.hpp"
 #include "opencv2/gpu/gpu.hpp"
-#include "edges.cpp"
+#include "util.cpp"
 
 using namespace cv;
 using namespace std;
 
-#define KERNEL_SIZE 13 
+#define KERNEL_SIZE 5
 #define SIGMA_X 3
 /*
  * All the references
@@ -26,7 +26,7 @@ int main()
     cout << "Webcam is not opened" << endl;
   }
 
-  Mat kernel = initialize_box_filter();
+  //Mat kernel = initialize_box_filter();
   Mat raw_image;
   Mat gray_image;
   Mat blur_image;
@@ -39,7 +39,7 @@ int main()
     cap.read(raw_image);
     cvtColor(raw_image, gray_image, CV_BGR2GRAY);
     //GaussianBlur(gray_image, blur_image, ksz, SIGMA_X);
-    //imshow("Test", EdgeDetector::GradientImage(blur_image, blur_image.cols, blur_image.rows));
+    //imshow("Test", Util::GradientImage(blur_image, blur_image.cols, blur_image.rows));
     waitKey(1);
   }
 

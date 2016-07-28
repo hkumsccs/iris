@@ -5,6 +5,4 @@
 
 namespace EdgeDetector
 {
-  void test();
-  cv::Mat GradientImage(cv::Mat& f, int width, int height); 
 };
