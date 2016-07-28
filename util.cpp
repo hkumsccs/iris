@@ -9,6 +9,11 @@ using namespace std;
 
 namespace Util
 {
+  cv::Mat BoxFilter(float size)
+  {
+    return cv::Mat::ones(size, size, CV_8UC1) / (size * size);
+  }
+
   cv::Mat GradientImage(cv::Mat& f, int width, int height)
   {
     // scale it to 0-255
@@ -26,6 +31,27 @@ namespace Util
     }
     return gradient;
   }
+   
+  void Convolve (cv::Mat& f, double* w, int width, int height, int a, int b)
+  {
+    cv::Mat f2 = f.clone();
+    int filter_size = min(2*a+1, 2*b+1);
+    for (int x = a; x < height - a; ++x)
+    {
+      for (int y = b; y < width - b; ++y)
+      {
+        double sum = 0.0;
+        for (int s = -a; s <= a; ++s)
+        {
+          for (int t = -b; t <= +b; ++t)
+          {
+            sum += w[(s+a) * filter_size + t + b] * (double)f2.at<uint8_t>(x+s, y+t);
+          }
+          f.at<uint8_t>(x, y) = sum;
+        }
+      }
+    }
+  }
 
   void Convolve (cv::Mat& f, cv::Mat& w, int width, int height, int a, int b)
   {
@@ -40,7 +66,7 @@ namespace Util
         {
           for (int t = -b; t <= +b; ++t)
           {
-            sum += w.at<uint8_t>(s+a, t+b) * f2.at<uint8_t>(x+s, y+t);
+            sum += (double)w.at<uint8_t>(s+a, t+b) * (double)f2.at<uint8_t>(x+s, y+t);
           }
           f.at<uint8_t>(x, y) = sum;
         }
@@ -64,28 +90,30 @@ namespace Util
       else
       {
         sum_half_mask += d;
-        half_mask.push_back(d);
+        half_mask.push_front(d);
       }
     }
 
-    // Reverse before convolution
     list<double> full_mask = list<double>(half_mask);
-    full_mask.reverse();
-    full_mask.insert(full_mask.begin(), half_mask.begin(), half_mask.end());
+    half_mask.reverse();
+    half_mask.pop_front();
+    full_mask.insert(full_mask.end(), half_mask.begin(), half_mask.end());
 
     // Transform the data structure from list<double> to Mat
-    cv::Mat mask(full_mask.size(), 1, CV_8UC1); 
+    //cv::Mat mask(1, full_mask.size(), cv::DataType<double>::type);
+    double mask[full_mask.size()];
     int iter = 0;
     while (!full_mask.empty())
     {
       // Trick: After multiply by 2, need to substract one for the peak value of Gussian filter
-      mask.at<uint8_t>(iter++, 1) = full_mask.front() / (sum_half_mask * 2 - 1);
+      //mask.at<uint8_t>(iter++, 1) = (double)(full_mask.front() / (sum_half_mask * 2 - 1));
+      mask[iter++] = (double)(full_mask.front() / (sum_half_mask * 2 - 1));
       full_mask.pop_front();
     }
 
     // Decompose 2D Gussian masking into executing 1D Gussian masking for twice
-    Convolve(f, mask, width, height, full_mask.size() / 2, 0); 
-    Convolve(f, mask, width, height, 0, full_mask.size() / 2); 
+    Convolve(f, mask, width, height, 2, 0); 
+    Convolve(f, mask, width, height, 0, 2); 
   }
   
 }

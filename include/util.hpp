@@ -6,8 +6,9 @@
 
 namespace Util
 {
-  cv::Mat BoxFilter (float size = 3.0);
+  cv::Mat BoxFilter (float size);
   cv::Mat GradientImage(cv::Mat& f, int width, int height); 
   void Convolve (cv::Mat& f, cv::Mat& w, int width, int height, int a, int b);
+  void Convolve (cv::Mat& f, double* w, int width, int height, int a, int b);
   void Smoothing (cv::Mat& f, double sigma, int width, int height);
 };
