@@ -4,6 +4,7 @@
 #include <math.h>
 
 using namespace std;
+using namespace Util;
 
 #define GUSSIAN_DIE_OFF 0.001
 
@@ -95,27 +96,27 @@ namespace Util
     Convolve(f, mask, width, height, 0, 2); 
   }
 
-  cv::Mat Histogram(cv::Mat f, bool is_horizontal)
+  cv::Mat ComputeHistogram(cv::Mat& f, bool is_horizontal)
   {
     int sz = is_horizontal ? f.rows : f.cols;
-    Mat mhist = cv::Mat::zeros(1, sz, CV_8U);
+    cv::Mat mhist = cv::Mat::zeros(1, sz, CV_8U);
     int max = -1;
     for(int j=0; j < sz; ++j)
     {
-      Mat data = t ? f.row(j) : f.col(j);
+      cv::Mat data = is_horizontal ? f.row(j) : f.col(j);
       int v = countNonZero(data);
       mhist.at< unsigned char >(j) = v;
       if(v > max)
       max=v;
     }
 
-    Mat histo;
+    cv::Mat histo;
     int width, height;
-    if(t)
+    if(is_horizontal)
     {
       width = max;
       height = sz;
-      histo = cv::Mat::zeros(Size(width, height), CV_8U);
+      histo = cv::Mat::zeros(cvSize(width, height), CV_8U);
 
       for(int i=0; i < height; ++i)
         for(int j=0; j < mhist.at< unsigned char >(i); ++j)
@@ -126,7 +127,7 @@ namespace Util
     {
       width = sz;
       height = max;
-      histo = cv::Mat::zeros(Size(width,height), CV_8U);
+      histo = cv::Mat::zeros(cv::Size(width,height), CV_8U);
       for(int i=0; i< width; ++i)
         for(int j=0; j< mhist.at< unsigned char >(i); ++j)
           histo.at< unsigned char >(max-j-1,i) = 255;

@@ -6,6 +6,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <vector>
+#include "util.cpp"
 
 using namespace cv;
 using namespace std;
@@ -45,25 +46,26 @@ int main()
 			Point pt2(faces[i].x,faces[i].y);
 			Mat faceROI = gray_img(faces[i]);
 			rectangle(gray_img, pt1, pt2, cvScalar(0,255,0), 2, 8, 0);
-      //line(gray_img, Point((pt2.x - pt1.x)/2, pt1.y), Point((pt2.x - pt1.x)/2, (pt2.y-pt1.y)/2), cvScalar(0,255,0));
       line(gray_img, Point((pt1.x + pt2.x)/2,pt2.y), Point((pt1.x + pt2.x)/2,(pt1.y + pt2.y)/2), Scalar(255,130,106,255), 2);
       line(gray_img, Point(pt2.x,(pt1.y+pt2.y)/2), Point(pt1.x,(pt1.y+pt2.y)/2), Scalar(255,130,106,255), 2);
 	
-      //Crop ROI
-      //Rect leyeROI(faces[i].x, faces[i].y, faces[i].width / 2, faces[i].height / 2);
-      //Rect reyeROI(faces[i].x + faces[i].width / 2, faces[i].x + faces[i].width / 2, faces[i].width / 2, faces[i].height / 2);
-
       Rect leyeROI(pt2.x, pt2.y, faces[i].width/2, faces[i].height/2);
       Rect reyeROI((pt2.x+pt1.x)/2, pt2.y, faces[i].width/2, faces[i].height/2);
       
       crop_leye = gray_img(leyeROI);
       crop_reye = gray_img(reyeROI);
 
-      imshow("Cropped left", crop_leye);
-      imshow("Cropped right", crop_reye);
+      //imshow("Cropped left", crop_leye);
+      //imshow("Cropped right", crop_reye);
 
-      //crop_reye = gray_img(reyeROI);
+      cv::Mat hclv = ComputeHistogram(crop_leye, true);
+      cv::Mat hclh = ComputeHistogram(crop_leye, false);
+      cv::Mat hcrv = ComputeHistogram(crop_reye, true);
+      cv::Mat hcrh = ComputeHistogram(crop_reye, false);
+      //imshow("Left eye histogram", Util::ComputeHistogram(crop_leye, true));
+      //imshow("Left eye histogram 2", Util::ComputeHistogram(crop_leye, false));
 		}
+
     imshow("Result", gray_img);
 		char c = waitKey(3);
 		if(c == 27)
