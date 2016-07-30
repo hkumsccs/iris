@@ -16,6 +16,7 @@ using namespace std;
  * http://docs.opencv.org/2.4/doc/tutorials/core/how_to_scan_images/how_to_scan_images.html#performance-difference
  *
 */
+//Test
 
 int main()
 {
