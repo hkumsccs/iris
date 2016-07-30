@@ -53,27 +53,6 @@ namespace Util
     }
   }
 
-  void Convolve (cv::Mat& f, cv::Mat& w, int width, int height, int a, int b)
-  {
-    cv::Mat f2 = f.clone();
-    int filter_size = min(2*a+1, 2*b+1);
-    for (int x = a; x < height - a; ++x)
-    {
-      for (int y = b; y < width - b; ++y)
-      {
-        double sum = 0.0;
-        for (int s = -a; s <= a; ++s)
-        {
-          for (int t = -b; t <= +b; ++t)
-          {
-            sum += (double)w.at<uint8_t>(s+a, t+b) * (double)f2.at<uint8_t>(x+s, y+t);
-          }
-          f.at<uint8_t>(x, y) = sum;
-        }
-      }
-    }
-  }
-
   void Smoothing (cv::Mat& f, double sigma, int width, int height)
   {
     double sum_half_mask = 0;
@@ -114,6 +93,45 @@ namespace Util
     // Decompose 2D Gussian masking into executing 1D Gussian masking for twice
     Convolve(f, mask, width, height, 2, 0); 
     Convolve(f, mask, width, height, 0, 2); 
+  }
+
+  cv::Mat Histogram(cv::Mat f, bool is_horizontal)
+  {
+    int sz = is_horizontal ? f.rows : f.cols;
+    Mat mhist = cv::Mat::zeros(1, sz, CV_8U);
+    int max = -1;
+    for(int j=0; j < sz; ++j)
+    {
+      Mat data = t ? f.row(j) : f.col(j);
+      int v = countNonZero(data);
+      mhist.at< unsigned char >(j) = v;
+      if(v > max)
+      max=v;
+    }
+
+    Mat histo;
+    int width, height;
+    if(t)
+    {
+      width = max;
+      height = sz;
+      histo = cv::Mat::zeros(Size(width, height), CV_8U);
+
+      for(int i=0; i < height; ++i)
+        for(int j=0; j < mhist.at< unsigned char >(i); ++j)
+          histo.at< unsigned char >(i,j) = 255;
+
+    }
+    else
+    {
+      width = sz;
+      height = max;
+      histo = cv::Mat::zeros(Size(width,height), CV_8U);
+      for(int i=0; i< width; ++i)
+        for(int j=0; j< mhist.at< unsigned char >(i); ++j)
+          histo.at< unsigned char >(max-j-1,i) = 255;
+    }
+    return histo;
   }
   
 }
