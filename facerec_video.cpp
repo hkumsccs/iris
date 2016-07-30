@@ -16,6 +16,8 @@ using namespace std;
 #define white CV_RGB(255,255,255)
 #define black CV_RGB(0,0,0)
 
+
+
 int main()
 {
 	CascadeClassifier face_cascade;
@@ -30,7 +32,7 @@ int main()
 		return 1;
 	}
 	Mat cap_img,gray_img;
-  Mat crop_leye,crop_reye;
+    Mat crop_leye,crop_reye, crop_lBrow, crop_rBrow;
 	vector<Rect> faces, eyes;
 	while(1)
 	{
@@ -53,14 +55,21 @@ int main()
       //Rect leyeROI(faces[i].x, faces[i].y, faces[i].width / 2, faces[i].height / 2);
       //Rect reyeROI(faces[i].x + faces[i].width / 2, faces[i].x + faces[i].width / 2, faces[i].width / 2, faces[i].height / 2);
 
-      Rect leyeROI(pt2.x, pt2.y, faces[i].width/2, faces[i].height/2);
-      Rect reyeROI((pt2.x+pt1.x)/2, pt2.y, faces[i].width/2, faces[i].height/2);
-      
+      Rect lBrowROI(pt2.x, pt2.y + faces[i].height/6, faces[i].width/2, faces[i].height/6);
+      Rect rBrowROI((pt2.x+pt1.x)/2, pt2.y + faces[i].height/6, faces[i].width/2, faces[i].height/6);
+	  Rect leyeROI(pt2.x, pt2.y + faces[i].height/3, faces[i].width/2, faces[i].height/6);
+      Rect reyeROI((pt2.x+pt1.x)/2, pt2.y + faces[i].height/3, faces[i].width/2, faces[i].height/6);
+
       crop_leye = gray_img(leyeROI);
       crop_reye = gray_img(reyeROI);
+	  crop_lBrow = gray_img(lBrowROI);
+	  crop_rBrow = gray_img(rBrowROI);
 
-      imshow("Cropped left", crop_leye);
-      imshow("Cropped right", crop_reye);
+
+      imshow("Cropped left eye", crop_leye);
+      imshow("Cropped right eye", crop_reye);
+	  imshow("Cropped left eyeBrow", crop_lBrow);
+	  imshow("Cropped right eyeBrow", crop_rBrow);
 
       //crop_reye = gray_img(reyeROI);
 		}
