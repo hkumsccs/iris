@@ -47,6 +47,15 @@ int main()
       //line(gray_img, Point((pt2.x - pt1.x)/2, pt1.y), Point((pt2.x - pt1.x)/2, (pt2.y-pt1.y)/2), cvScalar(0,255,0));
       line(gray_img, Point((pt1.x + pt2.x)/2,pt2.y), Point((pt1.x + pt2.x)/2,(pt1.y + pt2.y)/2), Scalar(255,130,106,255), 2);
       line(gray_img, Point(pt2.x,(pt1.y+pt2.y)/2), Point(pt1.x,(pt1.y+pt2.y)/2), Scalar(255,130,106,255), 2);
+		
+		//Crop ROI
+		Rect leyeROI(faces[i].x, faces[i].y, faces[i].width / 2, faces[i].height / 2);
+		Rect reyeROI(faces[i].x + faces[i].width / 2, faces[i].x + faces[i].width / 2, faces[i].width / 2, faces[i].height / 2);
+		Mat crop_leye = gray_img(leyeROI);
+		Mat crop_reye = gray_img(reyeROI);
+		//imshow("left eye", crop_leye);
+		//imshow("right eye", crop_reye);	
+		
 		}
 		imshow("Result", gray_img);
 		waitKey(3);
