@@ -63,6 +63,125 @@ int main()
       imshow("Cropped right", crop_reye);
 
       //crop_reye = gray_img(reyeROI);
+      
+      //Threshholding
+			for (int i = 0; i < crop_leye.rows; i++)
+			{
+				for (int j = 0; j < crop_leye.cols; j++)
+				{
+					if (crop_leye.at<uchar>(i, j) < 50)
+					{
+						crop_leye.at<uchar>(i, j) = 0;
+					}
+					else
+					{
+						crop_leye.at<uchar>(i, j) = 255;
+					}
+				}
+			}
+
+			//Find Left Eyes
+			int max_row = 99999999;
+			int peak_row = 0;
+			int peak_row_id = NULL;
+
+			for (int i = 0; i < crop_leye.rows; i++)
+			{
+				int temp_sum_row = 0;
+				for (int j = 0; j < crop_leye.cols; j++)
+				{
+					uchar intensity = gray_img.at<uchar>(i, j);
+					temp_sum_row = temp_sum_row + intensity;
+
+				}
+				//printf("(%d ", temp_sum_row);
+				if (temp_sum_row < max_row)
+				{
+					peak_row = temp_sum_row;
+					max_row = temp_sum_row;
+					peak_row_id = i;
+					//printf("(%d,%d)", peak_row_id, peak_row);
+				}
+			}
+
+			int max_col = 99999999;
+			int peak_col = 0;
+			int peak_col_id = NULL;
+
+			for (int i = 0; i < crop_leye.cols; i++)
+			{
+				int temp_sum_col = 0;
+				for (int j = 0; j < crop_leye.rows; j++)
+				{
+					uchar intensity = gray_img.at<uchar>(i, j);
+					temp_sum_col = temp_sum_col + intensity;
+
+				}
+				//printf("(%d ", temp_sum_row);
+				if (temp_sum_col < max_col)
+				{
+					peak_col = temp_sum_col;
+					max_col = temp_sum_col;
+					peak_col_id = i;
+					printf("(%d,%d)", peak_col_id, peak_col);
+				}
+			}
+
+			//Find Right Eyes
+			int max_row2 = 99999999;
+			int peak_row2 = 0;
+			int peak_row_id2 = NULL;
+
+			for (int i = 0; i < crop_reye.rows; i++)
+			{
+				int temp_sum_row = 0;
+				for (int j = 0; j < crop_reye.cols; j++)
+				{
+					uchar intensity = gray_img.at<uchar>(i, j);
+					temp_sum_row = temp_sum_row + intensity;
+
+				}
+				//printf("(%d ", temp_sum_row);
+				if (temp_sum_row < max_row2)
+				{
+					peak_row2 = temp_sum_row;
+					max_row2 = temp_sum_row;
+					peak_row_id2 = i;
+					//printf("(%d,%d)", peak_row_id, peak_row);
+				}
+			}
+
+			int max_col2 = 99999999;
+			int peak_col2 = 0;
+			int peak_col_id2 = NULL;
+
+			for (int i = 0; i < crop_reye.cols; i++)
+			{
+				int temp_sum_col = 0;
+				for (int j = 0; j < crop_reye.rows; j++)
+				{
+					uchar intensity = gray_img.at<uchar>(i, j);
+					temp_sum_col = temp_sum_col + intensity;
+
+				}
+				//printf("(%d ", temp_sum_row);
+				if (temp_sum_col < max_col2)
+				{
+					peak_col2 = temp_sum_col;
+					max_col2 = temp_sum_col;
+					peak_col_id2 = i;
+					printf("(%d,%d)", peak_col_id2, peak_col2);
+				}
+			}
+
+		
+			line(crop_leye, Point(peak_row_id, 0), Point(peak_row_id, crop_leye.cols), Scalar(0,0,0), 2);
+			line(crop_leye, Point(0, peak_col_id), Point(crop_leye.rows, peak_col_id), Scalar(0, 0, 0), 2);
+			line(crop_reye, Point(peak_row_id2, 0), Point(peak_row_id2, crop_reye.cols), Scalar(0, 0, 0), 2);
+			line(crop_reye, Point(0, peak_col_id2), Point(crop_reye.rows, peak_col_id2), Scalar(0, 0, 0), 2);
+
+			//imshow("left eye", crop_leye);
+			//imshow("right eye", crop_reye);
 		}
     imshow("Result", gray_img);
 		char c = waitKey(3);
