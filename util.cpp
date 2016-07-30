@@ -96,43 +96,83 @@ namespace Util
     Convolve(f, mask, width, height, 0, 2); 
   }
 
-  cv::Mat ComputeHistogram(cv::Mat& f, bool is_horizontal)
+  /*
+  std::pair<int, int> MaxVal(cv::Mat f, bool is_return_index = true)
   {
-    int sz = is_horizontal ? f.rows : f.cols;
-    cv::Mat mhist = cv::Mat::zeros(1, sz, CV_8U);
     int max = -1;
-    for(int j=0; j < sz; ++j)
+    std::pair<int, int> index;
+
+    for(int i = 0; i < f.rows; ++i)
     {
-      cv::Mat data = is_horizontal ? f.row(j) : f.col(j);
-      int v = countNonZero(data);
-      mhist.at< unsigned char >(j) = v;
-      if(v > max)
-      max=v;
+      for(int j=0; j < f.cols; ++j)
+      {
+        const int pixel_value = (int)f.at<uint8_t>(i, j);
+        if(pixel_value > max)
+        {
+          max = pixel_value;
+          index = std::make_pair(i, j);
+        }
+      }
     }
 
-    cv::Mat histo;
-    int width, height;
-    if(is_horizontal)
-    {
-      width = max;
-      height = sz;
-      histo = cv::Mat::zeros(cvSize(width, height), CV_8U);
-
-      for(int i=0; i < height; ++i)
-        for(int j=0; j < mhist.at< unsigned char >(i); ++j)
-          histo.at< unsigned char >(i,j) = 255;
-
-    }
-    else
-    {
-      width = sz;
-      height = max;
-      histo = cv::Mat::zeros(cv::Size(width,height), CV_8U);
-      for(int i=0; i< width; ++i)
-        for(int j=0; j< mhist.at< unsigned char >(i); ++j)
-          histo.at< unsigned char >(max-j-1,i) = 255;
-    }
-    return histo;
+    return is_return_index ? index : max;
   }
+  */
+
+  std::pair<int, int> FindIris(cv::Mat& f)
+  {
+    double max = -1.0;
+    int index_col = 0;
+    int index_row = 0;
+    cv::Mat diff_back, diff_front; 
+
+    for(int j=1; j < f.cols - 1; ++j)
+    {
+      cv::Mat successive_back_data_col = f.col(j-1);
+      cv::Mat data_col = f.col(j);
+      cv::Mat successive_front_data_col = f.col(j+1);
+
+      cv::absdiff(successive_back_data_col, data_col, diff_back);
+      cv::absdiff(successive_front_data_col, data_col, diff_front);
+      
+      double diff_col = 0.5 * (sum(diff_back)[0] + sum(diff_front)[0]);
+
+      if(diff_col > max)
+      {
+        max = diff_col; 
+        index_col = j;
+      }
+
+    }
+
+    max = -1.0;
+
+    for(int j=1; j < f.rows - 1; ++j)
+    {
+      cv::Mat successive_back_data_row = f.row(j-1);
+      cv::Mat data_row = f.row(j);
+      cv::Mat successive_front_data_row = f.row(j+1);
+
+      cv::absdiff(successive_back_data_row, data_row, diff_back);
+      cv::absdiff(successive_front_data_row, data_row, diff_front);
+      
+      double diff_row = 0.5 * (sum(diff_back)[0] + sum(diff_front)[0]);
+
+      if(diff_row > max)
+      {
+        max = diff_row;
+        index_row = j;
+      }
+      
+    }
+
+    return std::make_pair(index_row, index_col);
+  }
+
+  double Degree2Radian(double deg)
+  {
+    return deg * CV_PI / 180;
+  }
+  
   
 }
