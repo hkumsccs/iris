@@ -29,6 +29,9 @@ int main()
 		printf("error to initialize camera");
 		return 1;
 	}
+	capture.set(CV_CAP_PROP_FRAME_WIDTH, 320);
+	capture.set(CV_CAP_PROP_FRAME_WIDTH, 240);
+
 	Mat cap_img, gray_img;
 	vector<Rect> faces, eyes;
 	while (1)
@@ -191,7 +194,7 @@ int main()
 			//printf("(%d,%d, intensity value: %d)", crop_leye.rows, crop_leye.cols,intensity);
 			//printf("(%d,%d, intensity value: %d)", crop_leye.rows, crop_leye.cols,intensity);
 
-			for (int i = 10; i < crop_reye.cols; i++)
+			for (int i = 10; i < crop_reye.cols - 10; i++)
 			{
 				temp_sum_col2 = 0;
 				for (int j = 0; j < crop_reye.rows; j++)
@@ -205,20 +208,20 @@ int main()
 					peak_col2 = temp_sum_col2;
 					max_col2 = temp_sum_col2;
 					peak_col_id2 = i;
-					printf("(%d,%d)", peak_col_id2, peak_col2);
+					//printf("(%d,%d)", peak_col_id2, peak_col2);
 
 				}
 			}
 
 
-			line(crop_leye, Point(0, peak_row_id), Point(crop_leye.cols, peak_row_id), Scalar(255, 255, 255), 2);
-			line(crop_leye, Point(peak_col_id,0), Point(peak_col_id,crop_leye.rows), Scalar(255, 255, 255), 2);
-			line(crop_reye, Point(0, peak_row_id2), Point(crop_reye.cols, peak_row_id2), Scalar(255, 255, 255), 2);
-			line(crop_reye, Point(peak_col_id2, 0), Point(peak_col_id2, crop_reye.rows), Scalar(255, 255, 255), 2);
+			line(get_leye, Point(peak_col_id - 3, peak_row_id), Point(peak_col_id + 3, peak_row_id), Scalar(255, 255, 255), 2);
+			line(get_leye, Point(peak_col_id, peak_row_id - 3), Point(peak_col_id, peak_row_id + 3), Scalar(255, 255, 255), 2);
+			line(get_reye, Point(peak_col_id2 - 3, peak_row_id2), Point(peak_col_id2 + 3, peak_row_id2), Scalar(255, 255, 255), 2);
+			line(get_reye, Point(peak_col_id2, peak_row_id2 - 3), Point(peak_col_id2, peak_row_id2 + 3), Scalar(255, 255, 255), 2);
 
 
-			imshow("left eye", crop_leye);
-			imshow("right eye", crop_reye);
+			//imshow("left eye", crop_leye);
+			//imshow("right eye", crop_reye);
 
 		}
 		imshow("Result", gray_img);
