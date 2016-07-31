@@ -1,6 +1,7 @@
 #include "include/util.hpp"
 #include "iostream"
 #include <algorithm>
+#include <string>
 #include <math.h>
 
 using namespace std;
@@ -13,6 +14,26 @@ namespace Util
   cv::Mat BoxFilter(float size)
   {
     return cv::Mat::ones(size, size, CV_8UC1) / (size * size);
+  }
+
+  cv::Mat InvertedImage(cv::Mat& f, int width, int height, int threshold = -1)
+  {
+    cv::Mat inverted = f.clone();
+    int inverted_val = -1;
+    for(int x=1; x<height-1; ++x)
+      for(int y=1; y<width-1; ++y)
+      {
+        inverted_val = 255 - (int)f.at<uint8_t>(x, y);
+        if(threshold != -1)
+        {
+          inverted.at<uint8_t>(x, y) = inverted_val > threshold ? 255 : 0;
+        }
+        else
+        {
+          inverted.at<uint8_t>(x, y) = inverted_val;
+        }
+      }
+    return inverted;
   }
 
   cv::Mat GradientImage(cv::Mat& f, int width, int height)
@@ -96,28 +117,23 @@ namespace Util
     Convolve(f, mask, width, height, 0, 2); 
   }
 
-  /*
-  std::pair<int, int> MaxVal(cv::Mat f, bool is_return_index = true)
+  int GetHistInfo(int hist[], int size, bool is_return_index = true)
   {
-    int max = -1;
-    std::pair<int, int> index;
+    int max = 0;
+    int index = 0;
 
-    for(int i = 0; i < f.rows; ++i)
+    for(int i = 0; i < size; ++i)
     {
-      for(int j=0; j < f.cols; ++j)
+      if(hist[i] > max)
       {
-        const int pixel_value = (int)f.at<uint8_t>(i, j);
-        if(pixel_value > max)
-        {
-          max = pixel_value;
-          index = std::make_pair(i, j);
-        }
+        max = hist[i];
+        //cout << std::to_string(max) << " !!! " << std::to_string(i) << endl;
+        index = i;
       }
     }
 
     return is_return_index ? index : max;
   }
-  */
 
   std::pair<int, int> FindIris(cv::Mat& f)
   {
@@ -126,23 +142,19 @@ namespace Util
     int index_row = 0;
     cv::Mat diff_back, diff_front; 
 
+    int hist_col[320] = {0};
+    int hist_row[240] = {0};
+
     for(int j=1; j < f.cols - 1; ++j)
     {
       cv::Mat successive_back_data_col = f.col(j-1);
       cv::Mat data_col = f.col(j);
-      cv::Mat successive_front_data_col = f.col(j+1);
-
       cv::absdiff(successive_back_data_col, data_col, diff_back);
-      cv::absdiff(successive_front_data_col, data_col, diff_front);
-      
-      double diff_col = 0.5 * (sum(diff_back)[0] + sum(diff_front)[0]);
-
-      if(diff_col > max)
+      for(int i=0; i < diff_back.rows; ++i)
       {
-        max = diff_col; 
-        index_col = j;
+        //hist_col[(int)diff_back.at<uint8_t>(j, i)]++; 
+        hist_col[j] += (int)diff_back.at<uint8_t>(j, i);
       }
-
     }
 
     max = -1.0;
@@ -151,28 +163,32 @@ namespace Util
     {
       cv::Mat successive_back_data_row = f.row(j-1);
       cv::Mat data_row = f.row(j);
-      cv::Mat successive_front_data_row = f.row(j+1);
-
       cv::absdiff(successive_back_data_row, data_row, diff_back);
-      cv::absdiff(successive_front_data_row, data_row, diff_front);
-      
-      double diff_row = 0.5 * (sum(diff_back)[0] + sum(diff_front)[0]);
-
-      if(diff_row > max)
+      for(int i=0; i < diff_back.cols; ++i)
       {
-        max = diff_row;
-        index_row = j;
+        //hist_row[(int)diff_back.at<uint8_t>(i, j)]++; 
+        hist_row[j] += (int)diff_back.at<uint8_t>(i, j);
       }
-      
     }
 
-    return std::make_pair(index_row, index_col);
+    index_col = GetHistInfo(hist_col, f.cols);
+    index_row = GetHistInfo(hist_row, f.rows);
+
+    //Array2String(hist_col, 256);
+
+    return std::make_pair(index_col, index_row);
   }
 
   double Degree2Radian(double deg)
   {
     return deg * CV_PI / 180;
   }
-  
+
+  void Array2String(int a[], int size) {
+    std::string _o = "";
+    for (int i = 0; i < size; i++)
+      _o += std::to_string(a[i]) + " ";
+    cout << _o << endl;
+  }
   
 }
