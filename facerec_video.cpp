@@ -18,8 +18,6 @@ using namespace std;
 #define white CV_RGB(255,255,255)
 #define black CV_RGB(0,0,0)
 
-
-
 int main()
 {
 	CascadeClassifier face_cascade;

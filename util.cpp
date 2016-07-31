@@ -75,9 +75,42 @@ namespace Util
     }
   }
 
-  void Smoothing (cv::Mat& f, double sigma, int width, int height)
+  void Convolve (cv::Mat& f, cv::Mat& w)
+  {
+    int height = f.rows;
+    int width = f.cols;
+    int a = (w.rows - 1) / 2;
+    int b = (w.cols- 1) / 2;
+
+    //cout << width << " " << height << " " << a << " " << b << endl;
+
+    cv::Mat f2 = f.clone();
+
+    //cout << "Start" << endl;
+    
+    for (int x = a; x < height - a; ++x)
+    {
+      for (int y = b; y < width - b; ++y)
+      {
+        float sum = 0.0;
+        for (int s = -a; s <= a; ++s)
+        {
+          for (int t = -b; t <= b; ++t)
+          {
+            sum += w.at<float>(s+a, t+b) * f2.at<float>(x+s, y+t);
+          }
+          f.at<float>(x, y) = sum;
+        }
+      }
+    }
+
+    //cout << "End" << endl;
+  }
+
+  void Smoothing (cv::Mat& f, double sigma, int width, int height, int a, int b)
   {
     double sum_half_mask = 0;
+    int filter_size = min(2*a+1, 2*b+1);
 
     // Generate a 1D Gussian filter such that the discarded samples are less than 1/1000 of the peak value
     list<double> half_mask;

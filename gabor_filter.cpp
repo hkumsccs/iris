@@ -6,7 +6,7 @@
 namespace GaborFilter
 {
   // Reimplement the CV kernel, more light-weight 
-  // https://github.com/opencv/opencv/blob/2f4e38c8313ff313de7c41141d56d945d91f47cf/modules/imgproc/src/gabor.cpp
+  // Reference: https://github.com/opencv/opencv/blob/2f4e38c8313ff313de7c41141d56d945d91f47cf/modules/imgproc/src/gabor.cpp
   cv::Mat GaborKernel(double lambda, double theta, double psi, double sigma, double gamma, int kernel_size)
   {
     cv::Mat _kernel(kernel_size, kernel_size, CV_32F);

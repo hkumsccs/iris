@@ -7,6 +7,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <vector>
 #include "gabor_filter.cpp"
+#include "util.cpp"
 
 using namespace cv;
 using namespace std;
@@ -17,16 +18,25 @@ int main()
   double sig = 1, th = 0, lm = 1.0, gm = 0.02, ps = 0;
   while(1)
   {
-    cv::Mat kernel = cv::getGaborKernel(cv::Size(kernel_size, kernel_size), sig, th, lm, gm, ps);
-    //cv::Mat GaborKernel(double lambda, double theta, double psi, double sigma, double gamma, int kernel_size)
-    cv::Mat k = GaborFilter::GaborKernel(lm, th, ps, sig, gm, kernel_size);
+    Mat in = imread("./data/f2.jpg",0);          // load grayscale
+    Mat dest;
+    Mat src_f;
+    in.convertTo(src_f,CV_32F);
 
-    //cv::Mat mkKernel(int ks, double sig, double th, double lm, double ps)
-    //cv::Mat k1 = GaborFilter::mkKernel(kernel_size, sig, th, lm, ps);
-    imshow("Gabor", kernel);
-    imshow("k", k);
-    //imshow("k1", k1);
-    waitKey(1);
+    int kernel_size = 31;
+    double sig = 1, th = 0, lm = 1.0, gm = 0.02, ps = 0;
+    //cv::Mat kernel = cv::getGaborKernel(cv::Size(kernel_size,kernel_size), sig, th, lm, gm, ps);
+    cv::Mat kernel = GaborFilter::GaborKernel(lm, th, ps, sig, gm, kernel_size);
+    //cv::filter2D(src_f, dest, CV_32F, kernel);
+    Util::Convolve(src_f, kernel);
+
+    //cerr << dest(Rect(30,30,10,10)) << endl; // peek into the data
+
+    Mat viz;
+    src_f.convertTo(viz,CV_8U,1.0/255.0);     // move to proper[0..255] range to show it
+    imshow("k",kernel);
+    imshow("d",viz);
+    waitKey();
   }
   return 0;
 }
