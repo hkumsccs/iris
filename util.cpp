@@ -69,8 +69,8 @@ namespace Util
           {
             sum += w[(s+a) * filter_size + t + b] * (double)f2.at<uint8_t>(x+s, y+t);
           }
-          f.at<uint8_t>(x, y) = sum;
         }
+        f.at<uint8_t>(x, y) = sum;
       }
     }
   }
@@ -82,29 +82,18 @@ namespace Util
     int a = (w.rows - 1) / 2;
     int b = (w.cols- 1) / 2;
 
-    //cout << width << " " << height << " " << a << " " << b << endl;
-
     cv::Mat f2 = f.clone();
 
-    //cout << "Start" << endl;
-    
     for (int x = a; x < height - a; ++x)
-    {
       for (int y = b; y < width - b; ++y)
       {
         float sum = 0.0;
         for (int s = -a; s <= a; ++s)
-        {
           for (int t = -b; t <= b; ++t)
-          {
             sum += w.at<float>(s+a, t+b) * f2.at<float>(x+s, y+t);
-          }
-          f.at<float>(x, y) = sum;
-        }
+        f.at<float>(x, y) = sum;
       }
-    }
 
-    //cout << "End" << endl;
   }
 
   void Smoothing (cv::Mat& f, double sigma, int width, int height, int a, int b)

@@ -13,7 +13,7 @@ namespace GaborFilter
     const int half_size = kernel_size / 2;
     const double cth = cos(theta);
     const double sth = sin(theta);
-    const double exp_const = -.5 * sigma * sigma;
+    const double exp_const = -.5 / (sigma * sigma);
     const double cos_const = 2 * CV_PI / lambda;
     const double gamma_2 = gamma * gamma;
     // Parameters for rotation 
@@ -22,11 +22,11 @@ namespace GaborFilter
     for (int y = -half_size; y <= half_size; ++y)
     {
       _ysth = y * sth;
-      _ycth = -y * cth;
+      _ycth = y * cth;
       for (int x = -half_size; x <= half_size; ++x)
       {
         _theta_x = x * cth + _ysth;
-        _theta_y = x * sth + _ycth;
+        _theta_y = -x * sth + _ycth;
         _kernel.at<float>(half_size - y, half_size - x) = (float) exp(exp_const * (_theta_x * _theta_x + gamma_2 * _theta_y * _theta_y )) * cos(cos_const * _theta_x + psi);
       }
     }
