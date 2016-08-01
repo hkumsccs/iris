@@ -1,5 +1,7 @@
 .vscode/.browse.VC.db
 
+node_modules
+
 # Compiled Object files
 *.slo
 *.lo
