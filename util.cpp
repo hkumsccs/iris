@@ -75,7 +75,7 @@ namespace Util
     }
   }
 
-  void Convolve (const cv::Mat& f, cv::Mat& w, cv::Mat& output)
+  void Convolve (const cv::Mat& f, cv::Mat w, cv::Mat& output)
   {
     output = f.clone();
 
@@ -97,7 +97,11 @@ namespace Util
           { 
             for (int t = -b; t <= b; ++t)
             {
-              sum += w.at<float>(s+a, t+b) * f2.at<float>(x+s, y+t);
+              sum += (float)w.at<double>(s+a, t+b) * f2.at<float>(x+s, y+t);
+              if(s+a == 3)
+              {
+                //cout << (float)w.at<double>(s+a, t+b) << " " << s+a << " " << t+b << " " << endl;
+              }
             }
           }
         }

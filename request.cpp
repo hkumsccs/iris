@@ -32,6 +32,7 @@ int main(int argc, char *argv[])
 
         curl_slist *plist = curl_slist_append(NULL, "Content-Type:application/json;charset=UTF-8" );  
         curl_easy_setopt(pCurl, CURLOPT_HTTPHEADER, plist);  
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writefunc);
 
         // Setup json data
         curl_easy_setopt(pCurl, CURLOPT_POSTFIELDS, szJsonData);  
