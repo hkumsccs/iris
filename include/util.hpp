@@ -11,9 +11,8 @@ namespace Util
   cv::Mat GradientImage(cv::Mat& f, int width, int height); 
   cv::Mat InvertedImage(cv::Mat& f, int width, int height, int threshold); 
   void Convolve (cv::Mat& f, double* w, int width, int height, int a, int b);
-  void Convolve (cv::Mat& f, cv::Mat& w);
-  cv::Mat FilterMat2D(cv::Mat& input, cv::Mat& filter);
-  void Smoothing (cv::Mat& f, double sigma, int width, int height);
+  void Convolve (const cv::Mat& f, cv::Mat& w, cv::Mat& output);
+  void Smoothing (cv::Mat& f, double sigma, int width, int height, int a, int b);
   double Degree2Radian(double deg);
   int GetHistInfo(int hist[], int size, bool is_return_index);
   void Array2String(int a[], int size);

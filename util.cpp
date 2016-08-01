@@ -75,8 +75,10 @@ namespace Util
     }
   }
 
-  void Convolve (cv::Mat& f, cv::Mat& w)
+  void Convolve (const cv::Mat& f, cv::Mat& w, cv::Mat& output)
   {
+    output = f.clone();
+
     int height = f.rows;
     int width = f.cols;
     int a = (w.rows - 1) / 2;
@@ -84,16 +86,29 @@ namespace Util
 
     cv::Mat f2 = f.clone();
 
-    for (int x = a; x < height - a; ++x)
-      for (int y = b; y < width - b; ++y)
+    for (int x = 0; x < height; ++x)
+    {
+      for (int y = 0; y < width; ++y)
       {
         float sum = 0.0;
-        for (int s = -a; s <= a; ++s)
-          for (int t = -b; t <= b; ++t)
-            sum += w.at<float>(s+a, t+b) * f2.at<float>(x+s, y+t);
-        f.at<float>(x, y) = sum;
+        if(x >= a && x < height - a && y >= b && y < width - b )
+        {
+          for (int s = -a; s <= a; ++s)
+          { 
+            for (int t = -b; t <= b; ++t)
+            {
+              sum += w.at<float>(s+a, t+b) * f2.at<float>(x+s, y+t);
+            }
+          }
+        }
+        else
+        {
+          // zero padding
+          sum = f2.at<float>(x, y) * 255.0;
+        }
+        output.at<float>(x, y) = sum;
       }
-
+    }
   }
 
   void Smoothing (cv::Mat& f, double sigma, int width, int height, int a, int b)
