@@ -7,6 +7,6 @@
 namespace CornerDetector
 {
    std::list<std::pair<double, double> > FindCorners(cv::Mat& f, int width, int height, double sigma, double threshold); 
-   void ComputeR(cv::Mat& f, double sigma, double threshold, int width, int height, double *R, double k = 0.04);
-   cv::Mat CornerImage(cv::Mat&f, double sigma, double threshold, int width, int height);
+   void ComputeR(cv::Mat& f, double sigma, double threshold, int width, int height, double *R, int size, double k = 0.04);
+   cv::Mat CornerImage(cv::Mat&f, double sigma, double threshold, int width, int height, int size);
 };

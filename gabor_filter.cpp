@@ -30,7 +30,7 @@ namespace GaborFilter
         _kernel.at<float>(half_size - y, half_size - x) = (float) exp(exp_const * (_theta_x * _theta_x + gamma_2 * _theta_y * _theta_y )) * cos(cos_const * _theta_x + psi);
         if(half_size - y == 3)
         {
-          //std::cout << _kernel.at<float>(half_size - y, half_size - x) << std::endl;
+          //std::cout << half_size - y << " " << half_size - x << " " << _kernel.at<float>(half_size - y, half_size - x) << std::endl;
         }
       }
     }

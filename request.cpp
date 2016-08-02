@@ -1,17 +1,15 @@
 #include <curl/curl.h>  
 #include <string>  
 #include <exception>  
-//#include "restclient-cpp/restclient.h"
   
-// http://blog.csdn.net/dgyanyong/article/details/14166217
-int main(int argc, char *argv[])   
-{  
-  //RestClient::Response r = RestClient::post("http://localhost/activate", "application/json", "{\"foo\": \"bla\"}")
-  //RestClient::Response r = RestClient::post("http://url.com/post", "text/json", "{\"foo\": \"bla\"}");
-    char  szJsonData[2048];  
-    memset(szJsonData, 0,  sizeof (szJsonData));  
+namespace Trainer {
+  // http://blog.csdn.net/dgyanyong/article/details/14166217
+  void Activate(std::string fv_str)   
+  {  
+    char  szJsonData[4096];  
+    memset(szJsonData, 0,  sizeof(szJsonData));  
     std::string strJson =  "{" ;  
-    strJson +=  "\"featureVector\" : \"[0, 1]\"" ;  
+    strJson +=  "\"featureVector\" : \"" + fv_str + "\"" ;  
     strJson +=  "}" ;  
     strcpy(szJsonData, strJson.c_str());  
     try   
@@ -32,7 +30,6 @@ int main(int argc, char *argv[])
 
         curl_slist *plist = curl_slist_append(NULL, "Content-Type:application/json;charset=UTF-8" );  
         curl_easy_setopt(pCurl, CURLOPT_HTTPHEADER, plist);  
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writefunc);
 
         // Setup json data
         curl_easy_setopt(pCurl, CURLOPT_POSTFIELDS, szJsonData);  
@@ -49,10 +46,9 @@ int main(int argc, char *argv[])
       }  
       curl_global_cleanup();  
     }  
-    catch std::exception &ex)  
+    catch (std::exception &ex)  
     {  
       printf( "curl exception %s.\n" , ex.what());  
     }  
-    return  0;  
-}  
-
+  }  
+}

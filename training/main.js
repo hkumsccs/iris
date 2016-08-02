@@ -1,10 +1,12 @@
 const synaptic = require('synaptic'); // this line is not needed in the browser
 // train the network
-var learningRate = .3;
+var learningRate = 0.1;
 //Create a server
 //Lets require/import the HTTP module
 var http = require('http');
 var server = http.createServer(handleRequest);
+var csv = require('csv-parser')
+var fs = require('fs')
 
 
 const Neuron = synaptic.Neuron;
@@ -14,34 +16,32 @@ const Trainer = synaptic.Trainer;
 const Architect = synaptic.Architect;
 
 // create the network
-var inputLayer = new Layer(2);
-var hiddenLayer = new Layer(3);
-var hiddenLayer = new Layer(3);
+var inputLayer = new Layer(30);
+var hiddenLayer1 = new Layer(10);
+var hiddenLayer2 = new Layer(20);
 var outputLayer = new Layer(4);
 
-inputLayer.project(hiddenLayer);
-hiddenLayer.project(outputLayer);
+var myNetwork = new Architect.Perceptron(30, 150, 4);
+var trainer = new Trainer(myNetwork);
 
+var emotion = {
+  "1": [1, 0, 0, 0],
+  "2": [0, 1, 0, 0],
+  "3": [0, 0, 1, 0],
+  "4": [0, 0, 0, 1] 
+};
+
+inputLayer.project(hiddenLayer1);
+hiddenLayer1.project(outputLayer);
+//hiddenLayer2.project(outputLayer);
+
+/*
 var myNetwork = new Network({
     input: inputLayer,
-    hidden: [hiddenLayer],
+    hidden: [hiddenLayer1],
     output: outputLayer
 });
-
-for (var i = 0; i < 20000; i++)
-{
-    myNetwork.activate([0,0]);
-    myNetwork.propagate(learningRate, [1, 0, 0, 0]);
-
-    myNetwork.activate([0,1]);
-    myNetwork.propagate(learningRate, [0, 1, 0, 0]);
-
-    myNetwork.activate([1,0]);
-    myNetwork.propagate(learningRate, [0, 0, 1, 0]);
-
-    myNetwork.activate([1,1]);
-    myNetwork.propagate(learningRate, [0, 0, 0, 1]);
-}
+*/
 
 const EventEmitter = require('events');
 class MyEmitter extends EventEmitter {}
@@ -54,11 +54,42 @@ myEmitter.on('test', () => {
   //console.log(myNetwork.activate([1,1])); // [0.012950087641929467]
 });
 myEmitter.on('pre-train', () => {
+  // Load csv
+  var step = 0;
+  var trainingSet = [];
+  fs.createReadStream('./training.csv')
+  .pipe(csv(['featureVector', 'fileName', 'emotionType']))
+  .on('data', function (data) {
+    //console.log('fv: %s fn: %s', data.featureVector, data.fileName);
+    var inputNodes = data.featureVector.split(";");
+    //myNetwork.activate(inputNodes);
+    //myNetwork.propagate(learningRate, emotion[data.emotionType]);
 
+    trainingSet.push({
+      input: inputNodes,
+      output: emotion[data.emotionType]
+    });
+
+    console.log(step++, emotion[data.emotionType]);
+  })
+  .on('end', function(){
+    trainer.train(trainingSet, {
+      rate: .001,
+      iterations: 1,
+      error: .8,
+      shuffle: true,
+      log: 10,
+      cost: Trainer.cost.CROSS_ENTROPY
+    });
+    console.log('Finished')
+  });
 });
-myEmitter.on('activate', () => {
+myEmitter.on('activate', (body) => {
   // Train the network in real-time feed from C++ program
-   
+  var inputVector = JSON.parse(body).featureVector.split(';');
+  console.log('-------Result--------');
+  console.log(inputVector);
+  console.log(myNetwork.activate(inputVector));
 });
 myEmitter.on('real-time-training', () => {
   // TODO
@@ -85,12 +116,8 @@ function handleRequest(request, response){
           body.push(chunk);
         }).on('end', function() {
           body = Buffer.concat(body).toString();
-          console.log(JSON.parse(body).featureVector);
-          var output = {
-            output: myNetwork.activate(JSON.parse(body).featureVector)
-          }
-          response.setHeader('Content-Type', 'application/json');
-          response.end(JSON.stringify(output));
+          myEmitter.emit('activate', body); 
+          response.end('Finished ...');
         });
       }
     }
@@ -101,8 +128,13 @@ function handleRequest(request, response){
       response.end('It Works!! Path Hit: ' + request.url);
     }
 
+    if(request.url === '/load2propagate'){
+      myEmitter.emit('pre-train');
+      response.end('It Works!! Path Hit: ' + request.url);
+    }
 
     if(request.url === '/save') {
+      myEmitter.emit('save');
     }
 
     if(request.url === '/load') {
@@ -110,7 +142,6 @@ function handleRequest(request, response){
     }
 
 }
-
 
 //Lets start our server
 server.listen(PORT, function(){

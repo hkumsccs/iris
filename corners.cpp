@@ -7,17 +7,17 @@ using namespace std;
 
 namespace CornerDetector
 {
-  cv::Mat CornerImage(cv::Mat& f, double sigma, double threshold, int width, int height)
+  cv::Mat CornerImage(cv::Mat& f, double sigma, double threshold, int width, int height, int size)
   {
     double R[720 * 1280] = {0};
-    ComputeR(f, sigma, threshold, width, height, R);
+    ComputeR(f, sigma, threshold, width, height, R, size);
     cv::Mat f2 = cv::Mat::zeros(f.rows, f.cols, CV_8UC1);
 
     for (int x = 0; x < height - 1; ++x)
     {
       for (int y = 0; y < width - 1; ++y)
       {
-        f2.at<uint8_t>(x, y) = R[x*width + y] > threshold ? 255 : 0;
+        f2.at<uint8_t>(x, y) = (double)R[x*width + y] > threshold ? 255 : 0;
       }
     }
     
@@ -29,7 +29,7 @@ namespace CornerDetector
     std::list<std::pair<double, double> > corner_list;
 
     double R[ width*height ];
-    ComputeR(f, sigma, threshold, width, height, R);
+    ComputeR(f, sigma, threshold, width, height, R, 5);
 
     // Sub-pixel approximation
     for (int y = 1; y < height - 1; ++y)
@@ -56,7 +56,7 @@ namespace CornerDetector
     return corner_list;
   }
 
-  void ComputeR(cv::Mat& f, double sigma, double threshold, int width, int height, double* R, double k)
+  void ComputeR(cv::Mat& f, double sigma, double threshold, int width, int height, double* R, int size, double k)
   {
     // Initialization
     cv::Mat fx2 = cv::Mat::zeros(f.rows, f.cols, CV_8UC1);
@@ -68,17 +68,17 @@ namespace CornerDetector
     {
       for (int y = 1; y < width -1; ++y)
       {
-        int fx = (int)f.at<uint8_t>(x+1, y) - (int)f.at<uint8_t>(x-1, y);
-        int fy = (int)f.at<uint8_t>(x, y+1) - (int)f.at<uint8_t>(x, y-1);
+        int fx = f.at<uint8_t>(x+1, y) - f.at<uint8_t>(x-1, y);
+        int fy = f.at<uint8_t>(x, y+1) - f.at<uint8_t>(x, y-1);
         fx2.at<uint8_t>(x, y) = fx * fx;
         fy2.at<uint8_t>(x, y) = fy * fy;
         fxy.at<uint8_t>(x, y) = fx * fy;
       }
     }
 
-    Util::Smoothing(fx2, sigma, width, height);
-    Util::Smoothing(fy2, sigma, width, height);
-    Util::Smoothing(fxy, sigma, width, height);
+    Util::Smoothing(fx2, sigma, width, height, size);
+    Util::Smoothing(fy2, sigma, width, height, size);
+    Util::Smoothing(fxy, sigma, width, height, size);
 
     for (int x = 1; x < height - 1; ++x)
     {
@@ -90,7 +90,6 @@ namespace CornerDetector
         R[x*width+y] = det_A - k * trace_A * trace_A;
       }
     }
-    cout << R << endl;
   }
 
 }

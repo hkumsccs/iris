@@ -2,6 +2,9 @@
 
 node_modules
 
+data/jaffe
+data/faces
+
 # Compiled Object files
 *.slo
 *.lo
