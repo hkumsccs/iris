@@ -192,23 +192,7 @@ int main()
       }
 
 		}
-
-      
-
-      for (int i = 0; i < 40; ++i){
-    	cd::Mat k = GaborFilter::GaborKernel(GK_dataset[i][0], GK_dataset[i][1], GK_dataset[i][2], GK_dataset[i][3], GK_dataset[i][4], 13);
-    	Util::Convolve(crop_leye, k, output)
-    	feature_vector_leye[i][0]=LocalEnergy(output, width, height);
-	    feature_vector_leye[i][1]=MeanAmplitude(output, width, height);
-      }
-
-      for (int i = 0; i < 40; ++i){
-    	cd::Mat k = GaborFilter::GaborKernel(GK_dataset[i][0], GK_dataset[i][1], GK_dataset[i][2], GK_dataset[i][3], GK_dataset[i][4], 13);
-    	Util::Convolve(crop_leye, k, output)
-    	feature_vector_reye[i][0]=LocalEnergy(output, width, height);
-	    feature_vector_reye[i][1]=MeanAmplitude(output, width, height);
-      }
-
+    
 
     imshow("Result", gray_img);
 		char c = waitKey(3);
