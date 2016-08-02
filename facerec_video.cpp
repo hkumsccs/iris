@@ -16,6 +16,27 @@ using namespace std;
 #define white CV_RGB(255,255,255)
 #define black CV_RGB(0,0,0)
 
+/// Global Variables
+const int alpha_slider_max = 255;
+int alpha_slider = 20;
+double alpha;
+
+/// Matrices to store images
+Mat cap_img, gray_img;
+
+/**
+* @function on_trackbar
+* @brief Callback for trackbar
+*/
+void on_trackbar(int, void*)
+{
+	alpha = (double)alpha_slider / alpha_slider_max;
+	//beta = (1.0 - alpha);
+
+	//addWeighted(src1, alpha, src2, beta, 0.0, dst)
+	//imshow("Face Detection Window", gray_img);
+}
+
 int main()
 {
 	CascadeClassifier face_cascade;
@@ -32,12 +53,14 @@ int main()
 	capture.set(CV_CAP_PROP_FRAME_WIDTH, 320);
 	capture.set(CV_CAP_PROP_FRAME_WIDTH, 240);
 
-	Mat cap_img, gray_img;
+	//Mat cap_img, gray_img;
 	vector<Rect> faces, eyes;
 	while (1)
 	{
 		capture >> cap_img;
 		waitKey(10);
+
+		//Mat pic = imread("f1.jpeg");
 		cvtColor(cap_img, gray_img, CV_BGR2GRAY);
 		cv::equalizeHist(gray_img, gray_img);
 		face_cascade.detectMultiScale(gray_img, faces, 1.1, 10, CV_HAAR_SCALE_IMAGE | CV_HAAR_DO_CANNY_PRUNING, cvSize(0, 0), cvSize(300, 300));
@@ -70,15 +93,14 @@ int main()
 
 			//imshow("Cropped left", crop_leye);
 			//imshow("Cropped right", crop_reye);
-
 			//crop_reye = gray_img(reyeROI);
 
-			//Threshholding
+			// Thresholding left eye
 			for (int i = 0; i < crop_leye.rows; i++)
 			{
 				for (int j = 0; j < crop_leye.cols; j++)
 				{
-					if (crop_leye.at<uchar>(i, j) < 40)
+					if (crop_leye.at<uchar>(i, j) < alpha_slider)
 					{
 						crop_leye.at<uchar>(i, j) = 255;
 					}
@@ -88,12 +110,12 @@ int main()
 					}
 				}
 			}
-
+			// Thresholding right eye
 			for (int i = 0; i < crop_reye.rows; i++)
 			{
 				for (int j = 0; j < crop_reye.cols; j++)
 				{
-					if (crop_reye.at<uchar>(i, j) < 40)
+					if (crop_reye.at<uchar>(i, j) < alpha_slider)
 					{
 						crop_reye.at<uchar>(i, j) = 255;
 					}
@@ -104,20 +126,21 @@ int main()
 				}
 			}
 
-			for (int i = 0; i < crop_mouth.rows; i++)
-			{
-				for (int j = 0; j < crop_mouth.cols; j++)
-				{
-					if (crop_mouth.at<uchar>(i, j) < 50)
-					{
-						crop_mouth.at<uchar>(i, j) = 255;
-					}
-					else
-					{
-						crop_mouth.at<uchar>(i, j) = 0;
-					}
-				}
-			}
+			// Thresholding mouth
+			//for (int i = 0; i < crop_mouth.rows; i++)
+			//{
+			//	for (int j = 0; j < crop_mouth.cols; j++)
+			//	{
+			//		if (crop_mouth.at<uchar>(i, j) < 50)
+			//		{
+			//			crop_mouth.at<uchar>(i, j) = 255;
+			//		}
+			//		else
+			//		{
+			//			crop_mouth.at<uchar>(i, j) = 0;
+			//		}
+			//	}
+			//}
 
 			//Find Left Eyes
 			int max_row = 0;
@@ -245,7 +268,7 @@ int main()
 
 			int mouth_top = face_midPoint_x + (ED * 0.85);
 			int mouth_bottom = mouth_top + (ED * 0.65);
-			printf("(%d, %d, %d)", leye_y_dist, reye_y_dist, face_midPoint_y);
+			//printf("(%d, %d, %d)", leye_y_dist, reye_y_dist, face_midPoint_y);
 
 			line(get_leye, Point(peak_col_id - 3, peak_row_id), Point(peak_col_id + 3, peak_row_id), Scalar(255, 255, 255), 2);
 			line(get_leye, Point(peak_col_id, peak_row_id - 3), Point(peak_col_id, peak_row_id + 3), Scalar(255, 255, 255), 2);
@@ -265,9 +288,12 @@ int main()
 			//imshow("left eye", crop_leye);
 			//imshow("right eye", crop_reye);
 			//imshow("mouth", crop_mouth);
-
 		}
-		imshow("Result", gray_img);
+		//Create a trackbar
+		namedWindow("Face Detection Window", 1);
+		createTrackbar("Inverse Threshold", "Face Detection Window", &alpha_slider, alpha_slider_max, on_trackbar);
+		imshow("Face Detection Window", gray_img);
+
 		waitKey(3);
 		char c = waitKey(3);
 		if (c == 27)
