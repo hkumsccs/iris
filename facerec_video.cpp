@@ -55,15 +55,18 @@ int main()
 			//Rect leyeROI(pt2.x, pt2.y, faces[i].width / 2, faces[i].height / 2);
 			//Rect reyeROI((pt2.x + pt1.x) / 2, pt2.y, faces[i].width / 2, faces[i].height / 2);
 
-			Rect leyeROI(pt2.x, pt2.y + faces[i].height / 3, faces[i].width / 2, faces[i].height / 6);
-			Rect reyeROI((pt2.x + pt1.x) / 2, pt2.y + faces[i].height / 3, faces[i].width / 2, faces[i].height / 6);
+			Rect reyeROI(pt2.x, pt2.y + faces[i].height / 3, faces[i].width / 2, faces[i].height / 6);
+			Rect leyeROI((pt2.x + pt1.x) / 2, pt2.y + faces[i].height / 3, faces[i].width / 2, faces[i].height / 6);
+			Rect mouthROI(pt2.x + (pt1.x - pt2.x) * 1 / 4, pt2.y + (pt1.y - pt2.y)*11.5 / 16, faces[i].width * 1 / 2, faces[i].height * 1 / 4);
 
 			Mat get_leye = gray_img(leyeROI);
 			Mat get_reye = gray_img(reyeROI);
+			Mat get_mouth = gray_img(mouthROI);
 
-			Mat crop_leye,crop_reye;
+			Mat crop_leye, crop_reye, crop_mouth;
 			get_leye.copyTo(crop_leye);
 			get_reye.copyTo(crop_reye);
+			get_mouth.copyTo(crop_mouth);
 
 			//imshow("Cropped left", crop_leye);
 			//imshow("Cropped right", crop_reye);
@@ -75,7 +78,7 @@ int main()
 			{
 				for (int j = 0; j < crop_leye.cols; j++)
 				{
-					if (crop_leye.at<uchar>(i, j) < 20)
+					if (crop_leye.at<uchar>(i, j) < 40)
 					{
 						crop_leye.at<uchar>(i, j) = 255;
 					}
@@ -90,13 +93,28 @@ int main()
 			{
 				for (int j = 0; j < crop_reye.cols; j++)
 				{
-					if (crop_reye.at<uchar>(i, j) < 20)
+					if (crop_reye.at<uchar>(i, j) < 40)
 					{
 						crop_reye.at<uchar>(i, j) = 255;
 					}
 					else
 					{
 						crop_reye.at<uchar>(i, j) = 0;
+					}
+				}
+			}
+
+			for (int i = 0; i < crop_mouth.rows; i++)
+			{
+				for (int j = 0; j < crop_mouth.cols; j++)
+				{
+					if (crop_mouth.at<uchar>(i, j) < 50)
+					{
+						crop_mouth.at<uchar>(i, j) = 255;
+					}
+					else
+					{
+						crop_mouth.at<uchar>(i, j) = 0;
 					}
 				}
 			}
@@ -112,7 +130,7 @@ int main()
 			for (int i = 0; i < crop_leye.rows; i++)
 			{
 				temp_sum_row = 0;
-				for (int j = 0; j < crop_leye.cols; j++)
+				for (int j = 0; j < crop_leye.cols - 20; j++)
 				{
 					uchar intensity = crop_leye.at<uchar>(i, j);
 					temp_sum_row = temp_sum_row + intensity;
@@ -128,7 +146,7 @@ int main()
 
 				}
 			}
-			
+
 			int max_col = 0;
 			int peak_col = 0;
 			int peak_col_id = NULL;
@@ -138,7 +156,7 @@ int main()
 			//printf("(%d,%d, intensity value: %d)", crop_leye.rows, crop_leye.cols,intensity);
 			//printf("(%d,%d, intensity value: %d)", crop_leye.rows, crop_leye.cols,intensity);
 
-			for (int i = 10; i < crop_leye.cols; i++)
+			for (int i = 0; i < crop_leye.cols - 20; i++)
 			{
 				temp_sum_col = 0;
 				for (int j = 0; j < crop_leye.rows; j++)
@@ -152,7 +170,7 @@ int main()
 					peak_col = temp_sum_col;
 					max_col = temp_sum_col;
 					peak_col_id = i;
-					printf("(%d,%d)", peak_col_id, peak_col);
+					//printf("(%d,%d)", peak_col_id, peak_col);
 
 				}
 			}
@@ -168,7 +186,7 @@ int main()
 			for (int i = 0; i < crop_reye.rows; i++)
 			{
 				temp_sum_row2 = 0;
-				for (int j = 0; j < crop_reye.cols; j++)
+				for (int j = 20; j < crop_reye.cols; j++)
 				{
 					uchar intensity = crop_reye.at<uchar>(i, j);
 					temp_sum_row2 = temp_sum_row2 + intensity;
@@ -194,7 +212,7 @@ int main()
 			//printf("(%d,%d, intensity value: %d)", crop_leye.rows, crop_leye.cols,intensity);
 			//printf("(%d,%d, intensity value: %d)", crop_leye.rows, crop_leye.cols,intensity);
 
-			for (int i = 10; i < crop_reye.cols - 10; i++)
+			for (int i = 20; i < crop_reye.cols; i++)
 			{
 				temp_sum_col2 = 0;
 				for (int j = 0; j < crop_reye.rows; j++)
@@ -213,15 +231,40 @@ int main()
 				}
 			}
 
+			//Transform iris points to global coordinate
+			int gray_img_cols = gray_img.cols;
+			int half_face = faces[i].width / 2;
+			
+			int reye_y_dist, leye_y_dist;
+			leye_y_dist = faces[i].x + half_face + peak_col_id;
+			reye_y_dist = faces[i].x + peak_col_id2;
+
+			int ED = leye_y_dist - reye_y_dist;
+			int face_midPoint_y = reye_y_dist + ED / 2;
+			int face_midPoint_x = faces[i].y + faces[i].height /2 * 2/3  + peak_row_id;
+
+			int mouth_top = face_midPoint_x + (ED * 0.85);
+			int mouth_bottom = mouth_top + (ED * 0.65);
+			printf("(%d, %d, %d)", leye_y_dist, reye_y_dist, face_midPoint_y);
 
 			line(get_leye, Point(peak_col_id - 3, peak_row_id), Point(peak_col_id + 3, peak_row_id), Scalar(255, 255, 255), 2);
 			line(get_leye, Point(peak_col_id, peak_row_id - 3), Point(peak_col_id, peak_row_id + 3), Scalar(255, 255, 255), 2);
+
 			line(get_reye, Point(peak_col_id2 - 3, peak_row_id2), Point(peak_col_id2 + 3, peak_row_id2), Scalar(255, 255, 255), 2);
 			line(get_reye, Point(peak_col_id2, peak_row_id2 - 3), Point(peak_col_id2, peak_row_id2 + 3), Scalar(255, 255, 255), 2);
 
+			line(gray_img, Point(face_midPoint_y -3, face_midPoint_x), Point(face_midPoint_y + 3, face_midPoint_x), Scalar(255, 255, 255), 2);
+			line(gray_img, Point(face_midPoint_y, face_midPoint_x - 3), Point(face_midPoint_y, face_midPoint_x + 3), Scalar(255, 255, 255), 2);
+
+			line(gray_img, Point(face_midPoint_y - 3, mouth_top), Point(face_midPoint_y + 3, mouth_top), Scalar(255, 255, 255), 2);
+			line(gray_img, Point(face_midPoint_y, mouth_top - 3), Point(face_midPoint_y, mouth_top + 3), Scalar(255, 255, 255), 2);
+
+			line(gray_img, Point(face_midPoint_y - 3, mouth_bottom), Point(face_midPoint_y + 3, mouth_bottom), Scalar(255, 255, 255), 2);
+			line(gray_img, Point(face_midPoint_y, mouth_bottom - 3), Point(face_midPoint_y, mouth_bottom + 3), Scalar(255, 255, 255), 2);
 
 			//imshow("left eye", crop_leye);
 			//imshow("right eye", crop_reye);
+			//imshow("mouth", crop_mouth);
 
 		}
 		imshow("Result", gray_img);
