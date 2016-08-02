@@ -20,6 +20,53 @@ using namespace std;
 
 int main()
 {
+    double GK_dataset[40][5] = {
+    {5.0, 0.0, 0.0, 20.0, 0.5},
+    {5.0, 0.40, 0.0, 20.0, 0.5},
+    {5.0, 0.79, 0.0, 20.0, 0.5},
+    {5.0, 1.19, 0.0, 20.0, 0.5},
+    {5.0, 1.57, 0.0, 20.0, 0.5},
+    {5.0, 1.97, 0.0, 20.0, 0.5},
+    {5.0, 2.36, 0.0, 20.0, 0.5},
+    {5.0, 2.76, 0.0, 20.0, 0.5},
+    {10.0, 0.0, 0.0, 20.0, 0.5},
+    {10.0, 0.4, 0.0, 20.0, 0.5},
+    {10.0, 0.79, 0.0, 20.0, 0.5},
+    {10.0, 1.19, 0.0, 20.0, 0.5},
+    {10.0, 1.57, 0.0, 20.0, 0.5},
+    {10.0, 1.97, 0.0, 20.0, 0.5},
+    {10.0, 2.36, 0.0, 20.0, 0.5},
+    {10.0, 2.76, 0.0, 20.0, 0.5},
+    {15.0, 0.0, 0.0, 20.0, 0.5},
+    {15.0, 0.4, 0.0, 20.0, 0.5},
+    {15.0, 0.79, 0.0, 20.0, 0.5},
+    {15.0, 1.19, 0.0, 20.0, 0.5},
+    {15.0, 1.57, 0.0, 20.0, 0.5},
+    {15.0, 1.97, 0.0, 20.0, 0.5},
+    {15.0, 2.36, 0.0, 20.0, 0.5},
+    {15.0, 2.76, 0.0, 20.0, 0.5},
+    {20.0, 0.0, 0.0, 20.0, 0.5},
+    {20.0, 0.4, 0.0, 20.0, 0.5},
+    {20.0, 0.79, 0.0, 20.0, 0.5},
+    {20.0, 1.19, 0.0, 20.0, 0.5},
+    {20.0, 1.57, 0.0, 20.0, 0.5},
+    {20.0, 1.97, 0.0, 20.0, 0.5},
+    {20.0, 2.36, 0.0, 20.0, 0.5},
+    {20.0, 2.76, 0.0, 20.0, 0.5},
+    {25.0, 0.0, 0.0, 20.0, 0.5},
+    {25.0, 0.4, 0.0, 20.0, 0.5},
+    {25.0, 0.79, 0.0, 20.0, 0.5},
+    {25.0, 1.19, 0.0, 20.0, 0.5},
+    {25.0, 1.57, 0.0, 20.0, 0.5},
+    {25.0, 1.97, 0.0, 20.0, 0.5},
+    {25.0, 2.36, 0.0, 20.0, 0.5},
+    {25.0, 2.76, 0.0, 20.0, 0.5}
+  };
+
+  double feature_vector_leye[40][2];
+  double feature_vector_reye[40][2];
+
+
 	CascadeClassifier face_cascade;
 	if(!face_cascade.load("./metadata/haarcascade_frontalface_alt.xml")) {
 		printf("Error loading cascade file for face");
@@ -35,7 +82,7 @@ int main()
   capture.set(CV_CAP_PROP_FRAME_HEIGHT, 240);  
   
 	Mat cap_img, gray_img;
-  Mat crop_leye,crop_reye, crop_lBrow, crop_rBrow;
+  Mat crop_leye,crop_reye, crop_lBrow, crop_rBrow, output_leye, output_reye;
 	vector<Rect> faces, eyes;
 	while(1)
 	{
@@ -126,7 +173,42 @@ int main()
 
       imshow("Cropped left eye", cm_img0);
       imshow("Cropped right eye", cm_img1);
+
+      // imwrite("/Users/JianboMiao/Desktop/Emachine/data/f3.jpeg", crop_leye);
+      // imwrite("/Users/JianboMiao/Desktop/Emachine/data/f4.jpeg", crop_reye);)
+      
+      for (int i = 0; i < 40; ++i){
+    	cd::Mat k = GaborFilter::GaborKernel(GK_dataset[i][0], GK_dataset[i][1], GK_dataset[i][2], GK_dataset[i][3], GK_dataset[i][4], 13);
+    	Util::Convolve(crop_leye, k, output_leye)
+    	feature_vector_leye[i][0]=LocalEnergy(output, width, height);
+	    feature_vector_leye[i][1]=MeanAmplitude(output, width, height);
+      }
+
+      for (int i = 0; i < 40; ++i){
+    	cd::Mat k = GaborFilter::GaborKernel(GK_dataset[i][0], GK_dataset[i][1], GK_dataset[i][2], GK_dataset[i][3], GK_dataset[i][4], 13);
+    	Util::Convolve(crop_leye, k, output_reye)
+    	feature_vector_reye[i][0]=LocalEnergy(output, width, height);
+	    feature_vector_reye[i][1]=MeanAmplitude(output, width, height);
+      }
+
 		}
+
+      
+
+      for (int i = 0; i < 40; ++i){
+    	cd::Mat k = GaborFilter::GaborKernel(GK_dataset[i][0], GK_dataset[i][1], GK_dataset[i][2], GK_dataset[i][3], GK_dataset[i][4], 13);
+    	Util::Convolve(crop_leye, k, output)
+    	feature_vector_leye[i][0]=LocalEnergy(output, width, height);
+	    feature_vector_leye[i][1]=MeanAmplitude(output, width, height);
+      }
+
+      for (int i = 0; i < 40; ++i){
+    	cd::Mat k = GaborFilter::GaborKernel(GK_dataset[i][0], GK_dataset[i][1], GK_dataset[i][2], GK_dataset[i][3], GK_dataset[i][4], 13);
+    	Util::Convolve(crop_leye, k, output)
+    	feature_vector_reye[i][0]=LocalEnergy(output, width, height);
+	    feature_vector_reye[i][1]=MeanAmplitude(output, width, height);
+      }
+
 
     imshow("Result", gray_img);
 		char c = waitKey(3);

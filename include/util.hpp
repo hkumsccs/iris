@@ -16,4 +16,6 @@ namespace Util
   double Degree2Radian(double deg);
   int GetHistInfo(int hist[], int size, bool is_return_index);
   void Array2String(int a[], int size);
+  float MeanAmplitude( cv::Mat& f, int width, int height);
+  float LocalEnergy ( cv::Mat& f, int width, int height);
 };

@@ -231,5 +231,26 @@ namespace Util
       _o += std::to_string(a[i]) + " ";
     cout << _o << endl;
   }
+
+  float MeanAmplitude( cv::Mat& f, int width, int height){
+	float sum = 0.0;
+	for(int i = 0; i < width; ++i){
+	  for(int j = 0; j < height; ++j){
+		  sum += f.at<float>(j, i);
+		}
+	}
+	return sum;
+  }
+
+  float LocalEnergy ( cv::Mat& f, int width, int height){
+	float sum  = 0.0;
+	for(int i = 0; i < width; ++i){
+		for (int j = 0; j < height; ++j){
+			sum += f.at<float>(j, i) * f.at<float>(j, i);
+		}
+	}
+	return sum; 
+  }
+
   
 }
