@@ -80,16 +80,13 @@ int main()
 
 			Rect reyeROI(pt2.x, pt2.y + faces[i].height / 3, faces[i].width / 2, faces[i].height / 6);
 			Rect leyeROI((pt2.x + pt1.x) / 2, pt2.y + faces[i].height / 3, faces[i].width / 2, faces[i].height / 6);
-			Rect mouthROI(pt2.x + (pt1.x - pt2.x) * 1 / 4, pt2.y + (pt1.y - pt2.y)*11.5 / 16, faces[i].width * 1 / 2, faces[i].height * 1 / 4);
 
 			Mat get_leye = gray_img(leyeROI);
 			Mat get_reye = gray_img(reyeROI);
-			Mat get_mouth = gray_img(mouthROI);
 
-			Mat crop_leye, crop_reye, crop_mouth;
+			Mat crop_leye, crop_reye;
 			get_leye.copyTo(crop_leye);
 			get_reye.copyTo(crop_reye);
-			get_mouth.copyTo(crop_mouth);
 
 			//imshow("Cropped left", crop_leye);
 			//imshow("Cropped right", crop_reye);
@@ -285,9 +282,15 @@ int main()
 			line(gray_img, Point(face_midPoint_y - 3, mouth_bottom), Point(face_midPoint_y + 3, mouth_bottom), Scalar(255, 255, 255), 2);
 			line(gray_img, Point(face_midPoint_y, mouth_bottom - 3), Point(face_midPoint_y, mouth_bottom + 3), Scalar(255, 255, 255), 2);
 
+			Mat crop_mouth;
+			Rect mouthROI(pt2.x, mouth_top, faces[i].width, mouth_bottom - mouth_top);
+			Mat get_mouth = gray_img(mouthROI);
+			get_mouth.copyTo(crop_mouth);
+
+
 			//imshow("left eye", crop_leye);
 			//imshow("right eye", crop_reye);
-			//imshow("mouth", crop_mouth);
+			imshow("mouth", crop_mouth);
 		}
 		//Create a trackbar
 		namedWindow("Face Detection Window", 1);
