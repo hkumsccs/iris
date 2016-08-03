@@ -103,6 +103,8 @@ int main()
       //imshow("right eye", crop_reye);
       // Do training here
       
+      
+
       for(int an = 0; an < 150; an+=30)
       {
         Mat kernel = GaborFilter::GaborKernel(6.0, an * CV_PI / 180, 33 * CV_PI / 180, 9.0, 4.0, 13);

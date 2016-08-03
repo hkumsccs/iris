@@ -108,6 +108,9 @@ int main(int argc, char **argv)
 			get_reye.copyTo(crop_reye);
 			get_mouth.copyTo(crop_mouth);
 
+			imshow("left eye", crop_leye);
+			imshow("right eye", crop_reye);
+      
       for(int an = 0; an < 150; an+=30)
       {
         Mat kernel = GaborFilter::GaborKernel(6.0, an * CV_PI / 180, 33 * CV_PI / 180, 9.0, 4.0, 13);
@@ -346,8 +349,6 @@ int main(int argc, char **argv)
 			line(gray_img, Point(face_midPoint_y - 3, mouth_bottom), Point(face_midPoint_y + 3, mouth_bottom), Scalar(255, 255, 255), 2);
 			line(gray_img, Point(face_midPoint_y, mouth_bottom - 3), Point(face_midPoint_y, mouth_bottom + 3), Scalar(255, 255, 255), 2);
 
-			imshow("left eye", crop_leye);
-			imshow("right eye", crop_reye);
 			imshow("mouth", crop_mouth);
 		}
 
