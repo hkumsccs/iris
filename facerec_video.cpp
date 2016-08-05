@@ -18,8 +18,10 @@ using namespace std;
 
 /// Global Variables
 const int alpha_slider_max = 255;
+const int beta_slider_max = 255;
 int alpha_slider = 20;
-double alpha;
+int beta_slider = 20;
+double alpha,beta;
 
 /// Matrices to store images
 Mat cap_img, gray_img;
@@ -31,6 +33,7 @@ Mat cap_img, gray_img;
 void on_trackbar(int, void*)
 {
 	alpha = (double)alpha_slider / alpha_slider_max;
+	beta = (double)beta_slider / beta_slider_max;
 	//beta = (1.0 - alpha);
 
 	//addWeighted(src1, alpha, src2, beta, 0.0, dst)
@@ -59,8 +62,8 @@ int main()
 	{
 		capture >> cap_img;
 		waitKey(10);
-
-		Mat pic = imread("sad.jpg");
+		//Mat pic = cap_img;
+		Mat pic = imread("f1.jpeg");
 		cvtColor(pic, gray_img, CV_BGR2GRAY);
 		cv::equalizeHist(gray_img, gray_img);
 		face_cascade.detectMultiScale(gray_img, faces, 1.1, 10, CV_HAAR_SCALE_IMAGE | CV_HAAR_DO_CANNY_PRUNING, cvSize(0, 0), cvSize(300, 300));
@@ -281,7 +284,7 @@ int main()
 			{
 				for (int j = 0; j < crop_mouth.cols; j++)
 				{
-					if (crop_mouth.at<uchar>(i, j) < alpha_slider)
+					if (crop_mouth.at<uchar>(i, j) < beta_slider)
 					{
 						crop_mouth.at<uchar>(i, j) = 255;
 					}
@@ -330,11 +333,11 @@ int main()
 			lmouth_x_dist = mouth_top + mouth_left_x;
 			rmouth_x_dist = mouth_top + mouth_right_x;
 
-			//printf("(%d,%d,%d)", mouth_left_x, mouth_right_x, MD);
+			printf("(%d,%d,%d)", mouth_left_x, mouth_right_x, MD);
 			line(pic, Point(lmouth_y_dist - 3, lmouth_x_dist), Point(lmouth_y_dist + 3, lmouth_x_dist), Scalar(255, 255, 255), 2);
 			line(pic, Point(lmouth_y_dist, lmouth_x_dist - 3), Point(lmouth_y_dist, lmouth_x_dist + 3), Scalar(255, 255, 255), 2);
 
-			line(pic, Point(reye_y_dist - 3, lmouth_x_dist), Point(reye_y_dist + 3, rmouth_x_dist), Scalar(255, 255, 255), 2);
+			line(pic, Point(reye_y_dist - 3, rmouth_x_dist), Point(reye_y_dist + 3, rmouth_x_dist), Scalar(255, 255, 255), 2);
 			line(pic, Point(reye_y_dist, rmouth_x_dist - 3), Point(reye_y_dist, rmouth_x_dist + 3), Scalar(255, 255, 255), 2);
 
 			if (mouth_left_x > MD || mouth_right_x > MD)
@@ -354,11 +357,12 @@ int main()
 
 			//imshow("left eye", crop_leye);
 			//imshow("right eye", crop_reye);
-			//imshow("mouth", crop_mouth);
+			imshow("mouth", crop_mouth);
 		}
 		//Create a trackbar
 		namedWindow("Face Detection Window", 1);
-		createTrackbar("Inverse Threshold", "Face Detection Window", &alpha_slider, alpha_slider_max, on_trackbar);
+		createTrackbar("Eye Threshold", "Face Detection Window", &alpha_slider, alpha_slider_max, on_trackbar);
+		createTrackbar("Mouth Threshold", "Face Detection Window", &beta_slider, beta_slider_max, on_trackbar);
 		imshow("Face Detection Window", pic);
 
 		waitKey(3);
