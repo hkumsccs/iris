@@ -91,16 +91,21 @@ void on_trackbar_ps( int, void* )
   display();
 }
 
-int main()
+int main(int argc, char **argv)
 {
-	VideoCapture capture(0); //-1, 0, 1 device id
-	if(!capture.isOpened())
-	{
-		printf("error to initialize camera");
-		return 1;
-	}
-  capture.set(CV_CAP_PROP_FRAME_WIDTH, 320);  
-  capture.set(CV_CAP_PROP_FRAME_HEIGHT, 240);  
+  
+  VideoCapture capture(0); //-1, 0, 1 device id
+
+  if(argc == 1)
+  {
+    if (!capture.isOpened())
+    {
+      printf("error to initialize camera");
+      return 1;
+    }
+    capture.set(CV_CAP_PROP_FRAME_WIDTH, 320);
+    capture.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
+  }
   // ----------------------------------------------
 
   namedWindow("gf", 1);
@@ -122,7 +127,15 @@ int main()
   while(true)
   {
     //capture >> in;
-    in = imread("./image/YM.NE1.49.tiff");
+    if(argc == 1)
+    {
+      capture >> in;
+      waitKey(10);
+    }      
+    else
+    {
+      in = imread(argv[1]);
+    }
     waitKey(1);
     cvtColor(in, gray_img, CV_BGR2GRAY);
 

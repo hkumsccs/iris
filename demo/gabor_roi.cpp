@@ -8,16 +8,9 @@
 #include <vector>
 #include "../util.cpp"
 #include "../gabor_filter.cpp"
-#include "../request.cpp"
 
 using namespace cv;
 using namespace std;
-
-#define blue  CV_RGB(0,0,255)
-#define green CV_RGB(0,255,0)
-#define red   CV_RGB(255,0,0)
-#define white CV_RGB(255,255,255)
-#define black CV_RGB(0,0,0)
 
 /// Global Variables
 const int alpha_slider_max = 255;
@@ -26,12 +19,57 @@ double alpha;
 
 /// Matrices to store images
 Mat cap_img, gray_img;
-std::list<std::string> le_list;
-std::list<std::string> ma_list;
+int kernel_size = 9;
+int slider_sig;
+int slider_th;
+int slider_lm;
+int slider_gm;
+int slider_ps;
 
-std::list<std::string> feature_vec;
-std::list<std::string> valid_file_list;
+double sig = 1.0, th = 0.79, lm = 1.0, gm = 5.0, ps = 0.4;
 
+void display()
+{
+  static int index = 0;
+  printf(" Frame %d ============ \n", index++);
+  printf(" Kernel size : %d\n", kernel_size);
+  printf(" Theta       : %f\n", th);
+  printf(" Sigma       : %f\n", sig);
+  printf(" Lambda      : %f\n", lm);
+  printf(" Gamma       : %f\n", gm);
+  printf(" Psi         : %f\n", ps);
+  printf(" ===================== \n\n\n");
+}
+
+void on_trackbar_sig( int, void* )
+{
+  sig = slider_sig / 1.0;
+  display();
+}
+
+void on_trackbar_th( int, void* )
+{
+  th = slider_th * CV_PI / 180;
+  display();
+}
+
+void on_trackbar_lm( int, void* )
+{
+  lm = slider_lm / 1.0 ;
+  display();
+}
+
+void on_trackbar_gm( int, void* )
+{
+  gm = slider_gm / 1.0 ;
+  display();
+}
+
+void on_trackbar_ps( int, void* )
+{
+  ps = slider_ps * CV_PI / 180;
+  display();
+}
 /**
 * @function on_trackbar
 * @brief Callback for trackbar
@@ -39,23 +77,16 @@ std::list<std::string> valid_file_list;
 void on_trackbar(int, void*)
 {
 	alpha = (double)alpha_slider / alpha_slider_max;
-	//beta = (1.0 - alpha);
-
-	//addWeighted(src1, alpha, src2, beta, 0.0, dst)
-	//imshow("Face Detection Window", gray_img);
 }
 
 int main(int argc, char **argv)
 {
-
-  CascadeClassifier face_cascade;
-  if (!face_cascade.load("../metadata/haarcascade_frontalface_alt.xml")) {
-    printf("Error loading cascade file for face");
-    return 1;
-  }
-
-  VideoCapture capture(0); //-1, 0, 1 device id
-
+	CascadeClassifier face_cascade;
+	if (!face_cascade.load("../metadata/haarcascade_frontalface_alt.xml")) {
+		printf("Error loading cascade file for face");
+		return 1;
+	}
+	VideoCapture capture(0); //-1, 0, 1 device id
   if(argc == 1)
   {
     if (!capture.isOpened())
@@ -71,6 +102,7 @@ int main(int argc, char **argv)
 	vector<Rect> faces, eyes;
 	while (1)
 	{
+		//capture >> cap_img;
     if(argc == 1)
     {
       capture >> cap_img;
@@ -80,9 +112,15 @@ int main(int argc, char **argv)
     {
       cap_img = imread(argv[1]);
     }
-		//Mat pic = imread("f1.jpeg");
-    //cap_img = imread("./image/YM.NE1.49.tiff");
+		waitKey(10);
+
 		cvtColor(cap_img, gray_img, CV_BGR2GRAY);
+
+    Mat kernel = GaborFilter::GaborKernel(lm, th, ps, sig, gm, kernel_size);
+    Mat dest;
+    Mat dest1;
+    Mat dest2;
+
 		face_cascade.detectMultiScale(gray_img, faces, 1.1, 10, CV_HAAR_SCALE_IMAGE | CV_HAAR_DO_CANNY_PRUNING, cvSize(0, 0), cvSize(300, 300));
 		for (int i = 0; i < faces.size(); i++)
 		{
@@ -93,6 +131,10 @@ int main(int argc, char **argv)
 			//line(gray_img, Point((pt2.x - pt1.x)/2, pt1.y), Point((pt2.x - pt1.x)/2, (pt2.y-pt1.y)/2), cvScalar(0,255,0));
 			line(gray_img, Point((pt1.x + pt2.x) / 2, pt2.y), Point((pt1.x + pt2.x) / 2, (pt1.y + pt2.y) / 2), Scalar(255, 130, 106, 255), 2);
 			line(gray_img, Point(pt2.x, (pt1.y + pt2.y) / 2), Point(pt1.x, (pt1.y + pt2.y) / 2), Scalar(255, 130, 106, 255), 2);
+
+			//Crop ROI
+			//Rect leyeROI(pt2.x, pt2.y, faces[i].width / 2, faces[i].height / 2);
+			//Rect reyeROI((pt2.x + pt1.x) / 2, pt2.y, faces[i].width / 2, faces[i].height / 2);
 
 			Rect reyeROI(pt2.x, pt2.y + faces[i].height / 3, faces[i].width / 2, faces[i].height / 6);
 			Rect leyeROI((pt2.x + pt1.x) / 2, pt2.y + faces[i].height / 3, faces[i].width / 2, faces[i].height / 6);
@@ -107,61 +149,10 @@ int main(int argc, char **argv)
 			get_reye.copyTo(crop_reye);
 			get_mouth.copyTo(crop_mouth);
 
-			imshow("left eye", crop_leye);
-			imshow("right eye", crop_reye);
-      
-      for(int an = 0; an < 150; an+=30)
-      {
-        Mat kernel = GaborFilter::GaborKernel(6.0, an * CV_PI / 180, 33 * CV_PI / 180, 9.0, 4.0, 13);
+			//imshow("Cropped left", crop_leye);
+			//imshow("Cropped right", crop_reye);
+			//crop_reye = gray_img(reyeROI);
 
-        //cv::filter2D(gray_img, dest, CV_32F, kernel);
-        Mat dest = Util::FilterMat2D(crop_leye, kernel);
-        Mat dest1 = Util::FilterMat2D(crop_reye, kernel);
-        Mat dest2 = Util::FilterMat2D(crop_mouth, kernel);
-
-        float le = Util::LocalEnergy(dest, dest.cols, dest.rows);
-        float le1 = Util::LocalEnergy(dest1, dest1.cols, dest1.rows);
-        float le2 = Util::LocalEnergy(dest2, dest2.cols, dest2.rows);
-
-        float ma = Util::MeanAmplitude(dest, dest.cols, dest.rows);
-        float ma1 = Util::MeanAmplitude(dest1, dest1.cols, dest1.rows);
-        float ma2 = Util::MeanAmplitude(dest2, dest2.cols, dest2.rows);
-
-        le_list.push_back(std::to_string(le));
-        le_list.push_back(std::to_string(le1));
-        le_list.push_back(std::to_string(le2));
-        ma_list.push_back(std::to_string(ma));
-        ma_list.push_back(std::to_string(ma1));
-        ma_list.push_back(std::to_string(ma2));
-
-        // Free the memory
-        kernel.release();
-        dest.release();
-        dest1.release();
-        dest2.release();
-      }
-
-      std::string fv_le = "";
-      std::string fv_ma = "";
-      while (!le_list.empty())
-      {
-        fv_le += le_list.front() + ";";
-        fv_ma += ma_list.front() + ";";
-        le_list.pop_front();
-        ma_list.pop_front();
-      }
-
-      if (!fv_ma.empty() && fv_ma[fv_ma.length()-1] == ';') {
-        fv_ma.erase(fv_ma.length()-1);
-      }
-
-      // Send a http post to the server
-      Trainer::Activate(fv_le + fv_ma);
-
-      feature_vec.push_back(fv_le + fv_ma);
-
-      le_list.clear();
-      ma_list.clear();
 			// Thresholding left eye
 			for (int i = 0; i < crop_leye.rows; i++)
 			{
@@ -236,6 +227,40 @@ int main(int argc, char **argv)
 
 				}
 			}
+      
+
+      //cv::filter2D(gray_img, dest, CV_32F, kernel);
+      dest = Util::FilterMat2D(crop_leye.clone(), kernel);
+      dest1 = Util::FilterMat2D(crop_reye.clone(), kernel);
+      dest2 = Util::FilterMat2D(crop_mouth, kernel);
+
+      imshow("Left eye", dest);
+      imshow("Right eye", dest1);
+      imshow("Mouth", dest2);
+
+      //float le = Util::LocalEnergy(dest, dest.cols, dest.rows);
+      //float le1 = Util::LocalEnergy(dest1, dest1.cols, dest1.rows);
+      //float le2 = Util::LocalEnergy(dest2, dest2.cols, dest2.rows);
+
+      //float ma = Util::MeanAmplitude(dest, dest.cols, dest.rows);
+      //float ma1 = Util::MeanAmplitude(dest1, dest1.cols, dest1.rows);
+      //float ma2 = Util::MeanAmplitude(dest2, dest2.cols, dest2.rows);
+
+      //le_list.push_back(std::to_string(le));
+      //le_list.push_back(std::to_string(le1));
+      //le_list.push_back(std::to_string(le2));
+      //ma_list.push_back(std::to_string(ma));
+      //ma_list.push_back(std::to_string(ma1));
+      //ma_list.push_back(std::to_string(ma2));
+
+      // Free the memory
+      //kernel.release();
+
+      createTrackbar("Sigma", "gf", &slider_sig, 20, on_trackbar_sig);
+      createTrackbar("Theta", "gf", &slider_th, 180, on_trackbar_th);
+      createTrackbar("Lambda", "gf", &slider_lm, 12, on_trackbar_lm);
+      createTrackbar("Gamma", "gf", &slider_gm, 10, on_trackbar_gm);
+      createTrackbar("Psi", "gf", &slider_ps, 180, on_trackbar_ps);
 
 			int max_col = 0;
 			int peak_col = 0;
@@ -348,12 +373,30 @@ int main(int argc, char **argv)
 			line(gray_img, Point(face_midPoint_y - 3, mouth_bottom), Point(face_midPoint_y + 3, mouth_bottom), Scalar(255, 255, 255), 2);
 			line(gray_img, Point(face_midPoint_y, mouth_bottom - 3), Point(face_midPoint_y, mouth_bottom + 3), Scalar(255, 255, 255), 2);
 
-			imshow("mouth", crop_mouth);
+			//imshow("left eye", crop_leye);
+			//imshow("right eye", crop_reye);
+			//imshow("mouth", crop_mouth);
 		}
 
+    dest.release();
+    dest1.release();
+    dest2.release();
 		//Create a trackbar
 		namedWindow("Face Detection Window", 1);
 		createTrackbar("Inverse Threshold", "Face Detection Window", &alpha_slider, alpha_slider_max, on_trackbar);
+
+    slider_sig = 1;
+    slider_th = 0;
+    slider_gm = 2;
+    slider_lm = 3;
+    slider_ps = 0;
+
+    createTrackbar("Sigma", "Face Detection Window", &slider_sig, 20, on_trackbar_sig);
+    createTrackbar("Theta", "Face Detection Window", &slider_th, 180, on_trackbar_th);
+    createTrackbar("Lambda", "Face Detection Window", &slider_lm, 12, on_trackbar_lm);
+    createTrackbar("Gamma", "Face Detection Window", &slider_gm, 10, on_trackbar_gm);
+    createTrackbar("Psi", "Face Detection Window", &slider_ps, 180, on_trackbar_ps);
+
 		imshow("Face Detection Window", gray_img);
 
 		char c = waitKey(3);
