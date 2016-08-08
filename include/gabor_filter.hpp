@@ -8,5 +8,4 @@ namespace GaborFilter
   // https://en.wikipedia.org/wiki/Gabor_filter
   // 2D Gabor filter is a Gaussian kernel function modulated by a sinusoidal plane wave. 
   cv::Mat GaborKernel(double lambda, double theta, double psi, double sigma, double gamma, int kernel_size);
-  cv::Mat mkKernel(int ks, double sig, double th, double lm, double ps);
 }

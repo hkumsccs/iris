@@ -16,12 +16,6 @@
 using namespace cv;
 using namespace std;
 
-#define blue  CV_RGB(0,0,255)
-#define green CV_RGB(0,255,0)
-#define red   CV_RGB(255,0,0)
-#define white CV_RGB(255,255,255)
-#define black CV_RGB(0,0,0)
-
 /// Global Variables
 const int alpha_slider_max = 255;
 int alpha_slider = 20;
@@ -322,8 +316,5 @@ int main()
   feature_vec.clear();
   valid_file_list.clear();
 
-/*
-
-      */
 	return 0;
 }

@@ -2,8 +2,10 @@
 #include <string>  
 #include <exception>  
   
+// Sample code reference
+// http://blog.csdn.net/dgyanyong/article/details/14166217
+
 namespace Trainer {
-  // http://blog.csdn.net/dgyanyong/article/details/14166217
   void Activate(std::string fv_str)   
   {  
     char  szJsonData[4096];  

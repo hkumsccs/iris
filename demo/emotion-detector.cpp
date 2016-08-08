@@ -13,12 +13,6 @@
 using namespace cv;
 using namespace std;
 
-#define blue  CV_RGB(0,0,255)
-#define green CV_RGB(0,255,0)
-#define red   CV_RGB(255,0,0)
-#define white CV_RGB(255,255,255)
-#define black CV_RGB(0,0,0)
-
 /// Global Variables
 const int alpha_slider_max = 255;
 int alpha_slider = 20;
@@ -32,17 +26,9 @@ std::list<std::string> ma_list;
 std::list<std::string> feature_vec;
 std::list<std::string> valid_file_list;
 
-/**
-* @function on_trackbar
-* @brief Callback for trackbar
-*/
 void on_trackbar(int, void*)
 {
 	alpha = (double)alpha_slider / alpha_slider_max;
-	//beta = (1.0 - alpha);
-
-	//addWeighted(src1, alpha, src2, beta, 0.0, dst)
-	//imshow("Face Detection Window", gray_img);
 }
 
 int main(int argc, char **argv)
