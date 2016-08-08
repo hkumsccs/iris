@@ -62,8 +62,8 @@ int main()
 	{
 		capture >> cap_img;
 		waitKey(10);
-		//Mat pic = cap_img;
-		Mat pic = imread("f1.jpeg");
+		Mat pic = cap_img;
+		//Mat pic = imread("f1.jpeg");
 		cvtColor(pic, gray_img, CV_BGR2GRAY);
 		cv::equalizeHist(gray_img, gray_img);
 		face_cascade.detectMultiScale(gray_img, faces, 1.1, 10, CV_HAAR_SCALE_IMAGE | CV_HAAR_DO_CANNY_PRUNING, cvSize(0, 0), cvSize(300, 300));
